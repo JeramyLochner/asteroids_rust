@@ -1,6 +1,7 @@
 #[macro_use]
 mod events;
 pub mod data;
+pub mod gfx;
 
 use ::sdl2::render::Renderer;
 
@@ -25,10 +26,25 @@ pub struct Phi<'window> {
 }
 
 impl<'window> Phi<'window> {
+   fn new(events: Events, renderer: Renderer<'window>) -> Phi<'window> {
+      ::sdl2_image::init(::sdl2_image::INIT_PNG);
+
+      Phi {
+         events: events,
+         renderer: renderer,
+      }
+   }
+
 	pub fn output_size(&self) -> (f64, f64) {
 		let (w, h) = self.renderer.output_size().unwrap();
 		(w as f64, h as f64)
 	}
+}
+
+impl<'window> Drop for Phi<'window> {
+   fn drop(&mut self) {
+      ::sdl2_image::quit();
+   }
 }
 
 // Way for the currently executed view to communicate to the game loop.
@@ -57,11 +73,10 @@ where F: Fn(&mut Phi) -> Box<View> {
    		.build().unwrap();
 
    	// Create context
-   	let mut context = Phi {
-   		events: Events::new(sdl_context.event_pump().unwrap()),
-   		renderer: window.renderer().accelerated()
-   			.build().unwrap(),
-   	};
+   	let mut context = Phi::new(
+         Events::new(sdl_context.event_pump().unwrap()),
+         window.renderer().accelerated()
+            .build().unwrap());
 
    	// Create default view
    	let mut current_view =  init(&mut context);
