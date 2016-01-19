@@ -3,7 +3,11 @@ mod events;
 pub mod data;
 pub mod gfx;
 
+use self::gfx::Sprite;
+use ::sdl2::pixels::Color;
 use ::sdl2::render::Renderer;
+use ::std::collections::HashMap;
+use ::std::path::Path;
 
 struct_events! {
 	keyboard: {
@@ -23,6 +27,8 @@ struct_events! {
 pub struct Phi<'window> {
 	pub events: Events,
 	pub renderer: Renderer<'window>,
+
+   cached_fonts: HashMap<(&'static str, i32), ::sdl2_ttf::Font>,
 }
 
 impl<'window> Phi<'window> {
@@ -32,6 +38,7 @@ impl<'window> Phi<'window> {
       Phi {
          events: events,
          renderer: renderer,
+         cached_fonts: HashMap::new(),
       }
    }
 
@@ -39,6 +46,21 @@ impl<'window> Phi<'window> {
 		let (w, h) = self.renderer.output_size().unwrap();
 		(w as f64, h as f64)
 	}
+
+   pub fn ttf_str_sprite(&mut self, text: &str, font_path: &'static str, size: i32, color: Color) -> Option<Sprite> {
+      
+      if let Some(font) = self.cached_fonts.get(&(font_path, size)) {
+         return font.render(text, ::sdl2_ttf::blended(color)).ok()
+            .and_then(|surface| self.renderer.create_texture_from_surface(&surface).ok())
+            .map(Sprite::new)
+      }
+
+      ::sdl2_ttf::Font::from_file(Path::new(font_path), size).ok()
+         .and_then(|font| { 
+            self.cached_fonts.insert((font_path, size), font);
+            self.ttf_str_sprite(text, font_path, size, color)
+         })
+   }
 }
 
 impl<'window> Drop for Phi<'window> {
@@ -66,6 +88,7 @@ where F: Fn(&mut Phi) -> Box<View> {
    let sdl_context = ::sdl2::init().unwrap();
    let video = sdl_context.video().unwrap();
    let mut timer = sdl_context.timer().unwrap();	
+   let _ttf_context = ::sdl2_ttf::init();
 
    // Create window
    let window = video.window(title, 800, 600)
