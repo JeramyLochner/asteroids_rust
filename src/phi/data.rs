@@ -51,4 +51,43 @@ impl Rectangle {
 		self.y < other.y + other.h as f64 &&
 		self.y + self.h as f64 > other.y
 	}
+
+	pub fn with_size(w: f64, h: f64) -> Rectangle {
+		Rectangle {
+			w: w,
+			h: h,
+			x: 0.0,
+			y: 0.0,
+		}
+	}
+
+	pub fn center_at(self, center: (f64, f64)) -> Rectangle {
+		Rectangle {
+			x: center.0 - self.w / 2.0,
+			y: center.1 - self.h / 2.0,
+			..self
+		}
+	}
+
+	pub fn center(self) -> (f64, f64) {
+		let x = self.x + self.w / 2.0;
+		let y = self.y + self.h / 2.0;
+
+		(x, y)
+	}
+}
+
+pub struct MaybeAlive<T> {
+	pub alive: bool,
+	pub value: T,
+}
+
+impl<T> MaybeAlive<T> {
+	pub fn as_option(self) -> Option<T> {
+		if self.alive {
+			Some(self.value)
+		} else {
+			None
+		}
+	}
 }
