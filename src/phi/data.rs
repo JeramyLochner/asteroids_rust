@@ -1,5 +1,6 @@
 use ::sdl2::rect::Rect as SdlRect;
 
+// Implementation of Rectangle - Used for all entities for location and collision
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Rectangle {
 	pub x: f64,
@@ -16,6 +17,17 @@ impl Rectangle {
 		SdlRect::new(self.x as i32, self.y as i32, self.w as u32, self.h as u32).unwrap()
 	}
 
+		// Creates a new Rectangle with size wxh
+	pub fn with_size(w: f64, h: f64) -> Rectangle {
+		Rectangle {
+			w: w,
+			h: h,
+			x: 0.0,
+			y: 0.0,
+		}
+	}
+
+	// Guarantees self is inside of the parent Rectangle
 	pub fn move_inside(self, parent: Rectangle) -> Option<Rectangle> {
 		if self.w > parent.w || self.h > parent.h {
 			return None;
@@ -33,6 +45,7 @@ impl Rectangle {
 		})
 	}
 
+	// Returns whether self contains rect
 	pub fn contains(&self, rect: Rectangle) -> bool {
         let xmin = rect.x;
         let xmax = xmin + rect.w as f64;
@@ -45,6 +58,7 @@ impl Rectangle {
         ymax >= self.y && ymax <= self.y + self.h as f64
 	}
 
+	// Returns whether self and other are touching
 	pub fn overlaps(&self, other: Rectangle) -> bool {
 		self.x < other.x + other.w as f64 &&
 		self.x + self.w as f64 > other.x &&
@@ -52,15 +66,7 @@ impl Rectangle {
 		self.y + self.h as f64 > other.y
 	}
 
-	pub fn with_size(w: f64, h: f64) -> Rectangle {
-		Rectangle {
-			w: w,
-			h: h,
-			x: 0.0,
-			y: 0.0,
-		}
-	}
-
+	// Centers the rectangle at (x,y)
 	pub fn center_at(self, center: (f64, f64)) -> Rectangle {
 		Rectangle {
 			x: center.0 - self.w / 2.0,
@@ -69,6 +75,7 @@ impl Rectangle {
 		}
 	}
 
+	// Returns the center (x,y) of the rectangle
 	pub fn center(self) -> (f64, f64) {
 		let x = self.x + self.w / 2.0;
 		let y = self.y + self.h / 2.0;
@@ -77,6 +84,7 @@ impl Rectangle {
 	}
 }
 
+// Implementaiton of MaybeAlive - Used by Entities that may die that frame
 pub struct MaybeAlive<T> {
 	pub alive: bool,
 	pub value: T,

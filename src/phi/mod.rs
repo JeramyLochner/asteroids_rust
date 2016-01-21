@@ -9,6 +9,7 @@ use ::sdl2::render::Renderer;
 use ::std::collections::HashMap;
 use ::std::path::Path;
 
+// Instantiates a new event macro with keyboard/window events
 struct_events! {
 	keyboard: {
 		key_escape: Escape,
@@ -28,7 +29,7 @@ struct_events! {
 	}
 }
 
-// Bundles the Phi abstraction in a single structure
+// Bundles the Phi abstraction in a single structure for easier parametrization
 pub struct Phi<'window> {
 	pub events: Events,
 	pub renderer: Renderer<'window>,
@@ -47,11 +48,13 @@ impl<'window> Phi<'window> {
       }
    }
 
+   // Returns the size of the window (w, h)
 	pub fn output_size(&self) -> (f64, f64) {
 		let (w, h) = self.renderer.output_size().unwrap();
 		(w as f64, h as f64)
 	}
 
+   // Gets a string and returns a Font sprite
    pub fn ttf_str_sprite(&mut self, text: &str, font_path: &'static str, size: i32, color: Color) -> Option<Sprite> {
       
       if let Some(font) = self.cached_fonts.get(&(font_path, size)) {
@@ -69,6 +72,7 @@ impl<'window> Phi<'window> {
 }
 
 impl<'window> Drop for Phi<'window> {
+   // Kills sdl2_image if the window is killed
    fn drop(&mut self) {
       ::sdl2_image::quit();
    }

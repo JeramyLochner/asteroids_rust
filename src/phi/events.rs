@@ -1,3 +1,4 @@
+// Macro to determine what events are happening that frame from keyboard and window
 macro_rules! struct_events {
     ( 
     	keyboard: { $( $k_alias:ident : $k_sdl:ident),* },
